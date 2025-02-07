@@ -79,6 +79,38 @@ public:
     }
 
     // 可选：防止拷贝构造和赋值
-    Stack(const Stack &) = delete;
-    Stack &operator=(const Stack &) = delete;
+    Stack(const Stack &other)
+    {
+        this->capacity = other.capacity;
+        this->data = new T[this->capacity];
+        this->topIndex = other.topIndex;
+        for (int i = 0; i <= this->topIndex;i++)
+        {
+            this->data[i] = other.data[i];
+        }
+    }
+    Stack &operator=(const Stack &other)
+    {
+        if (this != &other)
+        {
+            // 先分配新的内存
+            T *newData = new T[other.capacity];
+
+            // 复制栈中的元素
+            for (int i = 0; i <= other.topIndex; ++i)
+            {
+                newData[i] = other.data[i];
+            }
+
+            // 释放当前对象的数据
+            delete[] this->data;
+
+            // 更新当前对象的成员变量
+            this->data = newData;
+            this->capacity = other.capacity;
+            this->topIndex = other.topIndex;
+        }
+        return *this; // 返回当前对象的引用
+        
+    }
 };
