@@ -22,7 +22,7 @@ public:
 
     // 基础操作
     void enqueue(const T &element); // 入队
-    T dequeue();                    // 出队
+    T dequeue();                    // 出队 
     T front() const;                // 查看队首元素
     bool isEmpty() const;           // 判断队列是否为空
     int size() const;               // 获取元素数量

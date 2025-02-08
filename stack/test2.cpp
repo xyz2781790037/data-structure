@@ -34,8 +34,11 @@ void test2()
     lls1.push(50);
     lls1.push(60);
     lls2 = lls1;
-    cout << "lls size : " << lls2.size() << endl;
-    cout << "lls data : " << lls2.top() << endl;
+    cout << "lls2 size : " << lls2.size() << endl;
+    cout << "lls2 data : " << lls2.top() << endl;
+    LinkedListStack<int> lls3(lls1);
+    cout << "lls3 size : " << lls3.size() << endl;
+    cout << "lls3 data : " << lls3.top() << endl;
 }
 int main()
 {

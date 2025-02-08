@@ -1,5 +1,6 @@
 #include <stdexcept> // 用于异常处理
 #include <iostream>
+#include <vector>
 using namespace std;
 template <typename T>
 class LinkedListStack
@@ -10,7 +11,7 @@ private:
         T data;
         Node *next;
         Node(const T &val, Node *nxt = nullptr) : data(val), next(nxt) {}
-    }sn;
+    } sn;
 
     Node *topNode;    // 栈顶节点指针
     int elementCount; // 元素计数器
@@ -36,13 +37,13 @@ public:
     // 基础操作接口
     void push(const T &value)
     {
-        sn*newnode = new Node(value,topNode);
+        sn *newnode = new Node(value, topNode);
         this->topNode = newnode;
         elementCount++;
     }
     void pop()
     {
-        if(topNode == nullptr)
+        if (topNode == nullptr)
         {
             cout << "pop error!" << endl;
             return;
@@ -75,7 +76,7 @@ public:
     // 清空栈
     void clear()
     {
-        while(topNode != nullptr)
+        while (topNode != nullptr)
         {
             sn *tmp = topNode;
             topNode = topNode->next;
@@ -87,27 +88,38 @@ public:
     LinkedListStack(const LinkedListStack &other)
     {
         topNode = nullptr;
-        elementCount = 0;
+        vector<int> tmp;
         sn *cur = other.topNode;
-        while(cur != nullptr)
+        while (cur != nullptr)
         {
-            this->push(cur->data);
+            tmp.push_back(cur->data);
             cur = cur->next;
         }
+        for (auto it = tmp.rbegin(); it != tmp.rend(); it++)
+        {
+            this->push(*it);
+        }
+        tmp.clear();
     }
     // 赋值运算符
     LinkedListStack &operator=(const LinkedListStack &other)
     {
-        if(this != &other)
+        if (this != &other)
         {
+            vector<int> tmp;
             this->clear();
             this->elementCount = 0;
             sn *cur = other.topNode;
-            while(cur != nullptr)
+            while (cur != nullptr)
             {
-                this->push(cur->data);
+                tmp.push_back(cur->data);
                 cur = cur->next;
             }
+            for (auto it = tmp.rbegin(); it != tmp.rend(); it++)
+            {
+                this->push(*it);
+            }
+            tmp.clear();
         }
         return *this;
     }
