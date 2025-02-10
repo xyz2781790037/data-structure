@@ -11,8 +11,8 @@ private:
         K key;
         V value;
         Node *next;
-        Node(const K &k, const V &v, Node *n = nullptr): key(k), value(v), next(n) {}
-    }sn;
+        Node(const K &k, const V &v, Node *n = nullptr) : key(k), value(v), next(n) {}
+    } sn;
 
     // 哈希桶动态数组
     Node **buckets;      // 桶数组（指针数组）
@@ -28,14 +28,21 @@ private:
     void rehash(size_t newBucketSize)
     {
         sn **newbuckets = new sn *[newBucketSize];
-        for (int i = 0; i < bucketSize;i++)
+        bucketSize = newBucketSize;
+        for (int i = 0; i < bucketSize; i++)
         {
             sn *cur = buckets[i];
-            while(cur)
+            while (cur)
             {
-                
+                size_t newkey = hashFunction(cur->key);
+                newbuckets[newkey] = new sn(cur->key, cur->next);
+                sn *tmp = cur;
+                cur = cur->next;
+                delete tmp;
             }
         }
+        delete[] buckets;
+        buckets = newbuckets;
     }
 
 public:
@@ -59,7 +66,7 @@ public:
         sn *newnode = new Node(key, value);
         newnode->next = buckets[index];
         buckets[index] = newnode;
-        if(elementCount / bucketSize > maxLoadFactor)
+        if ((float)elementCount / bucketSize > maxLoadFactor)
         {
             rehash(bucketSize * 2);
         }
@@ -67,10 +74,39 @@ public:
     // 删除
     bool remove(const K &key)
     {
-
+        size_t index = hashFunction(key);
+        elementCount--;
+        delete buckets[index];
     }
-    bool contains(const K &key) const;         // 存在性检查
-    V *get(const K &key);                      // 获取值指针（不存在返回nullptr）
+    // 存在性检查
+    bool contains(const K &key) const
+    {
+        size_t index = hashFunction(key);
+        sn *cur = buckets[index];
+        while (cur)
+        {
+            if (cur->key == key)
+            {
+                return true;
+            }
+            cur = cur->next;
+        }
+        return false;
+    }
+    // 获取值指针（不存在返回nullptr）
+    V *get(const K &key)
+    {
+        size_t index = hashFunction(key);
+        sn *cur = buckets[index];
+        while (cur)
+        {
+            if (cur->key == key)
+                return &cur->value;
+            cur = cur->next;
+        }
+        return nullptr; // 键不存在
+    }
+
     const V *get(const K &key) const;
 
     // 工具方法
