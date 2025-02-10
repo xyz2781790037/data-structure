@@ -1,49 +1,84 @@
-#include <vector>
-#include <list>
 #include <stdexcept>
-#include <functional> // 用于 std::hash
-#include <iostream>
-using namespace std;
+#include <functional> // 用于哈希函数
+
 template <typename K, typename V>
 class HashMap
 {
 private:
-    // 键值对节点
-    struct KeyValuePair
+    // 链表节点定义
+    typedef struct Node
     {
         K key;
         V value;
-        KeyValuePair(const K &k, const V &v) : key(k), value(v) {}
-    };
+        Node *next;
+        Node(const K &k, const V &v, Node *n = nullptr): key(k), value(v), next(n) {}
+    }sn;
 
-    // 哈希桶（链表实现）
-    std::vector<std::list<KeyValuePair>> buckets;
-
-    size_t elementCount; // 当前元素数量
+    // 哈希桶动态数组
+    Node **buckets;      // 桶数组（指针数组）
+    size_t bucketSize;   // 当前桶数量
+    size_t elementCount; // 元素总数
     float maxLoadFactor; // 最大负载因子（默认0.75）
 
     // 私有方法
-    size_t hashFunction(const K &key) const; // 哈希函数
-    void rehash(size_t newCapacity);         // 重新哈希扩容
+    size_t hashFunction(const K &key) const
+    {
+        return key % bucketSize;
+    }
+    void rehash(size_t newBucketSize)
+    {
+        sn **newbuckets = new sn *[newBucketSize];
+        for (int i = 0; i < bucketSize;i++)
+        {
+            sn *cur = buckets[i];
+            while(cur)
+            {
+                
+            }
+        }
+    }
 
 public:
     // 构造函数
-    HashMap(size_t initialCapacity = 10, float loadFactor = 0.75f);
+    explicit HashMap(size_t initialBucketSize = 10, float loadFactor = 0.75f)
+    {
+        maxLoadFactor = loadFactor;
+        elementCount = 0;
+        bucketSize = initialBucketSize;
+        buckets = new sn *[bucketSize];
+    }
+
+    // 析构函数
+    ~HashMap();
 
     // 基础操作
-    void insert(const K &key, const V &value); // 插入键值对
-    bool erase(const K &key);                  // 删除键值对
-    bool contains(const K &key) const;         // 判断键是否存在
-    V &operator[](const K &key);               // 通过键访问值（不存在则插入默认值）
-    V &at(const K &key);                       // 安全访问值（不存在则抛异常）
-    const V &at(const K &key) const;
+    void insert(const K &key, const V &value)
+    {
+        size_t index = hashFunction(key);
+        elementCount++;
+        sn *newnode = new Node(key, value);
+        newnode->next = buckets[index];
+        buckets[index] = newnode;
+        if(elementCount / bucketSize > maxLoadFactor)
+        {
+            rehash(bucketSize * 2);
+        }
+    }
+    // 删除
+    bool remove(const K &key)
+    {
+
+    }
+    bool contains(const K &key) const;         // 存在性检查
+    V *get(const K &key);                      // 获取值指针（不存在返回nullptr）
+    const V *get(const K &key) const;
 
     // 工具方法
-    size_t size() const; // 元素数量
-    bool empty() const;  // 是否为空
-    void clear();        // 清空哈希表
+    size_t size() const { return elementCount; }
+    bool empty() const { return elementCount == 0; }
+    void clear();
 
-    // 禁用拷贝（或实现深拷贝）
+    // 禁用拷贝（或手动实现深拷贝）
     HashMap(const HashMap &) = delete;
     HashMap &operator=(const HashMap &) = delete;
 };
