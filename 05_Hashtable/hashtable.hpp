@@ -1,6 +1,7 @@
 #include <stdexcept>
+#include <iostream>
 #include <functional> // 用于哈希函数
-
+using namespace std;
 template <typename K, typename V>
 class HashMap
 {
@@ -27,24 +28,25 @@ private:
     }
     void rehash(size_t newBucketSize)
     {
-        sn **newbuckets = new sn *[newBucketSize];
+        sn **newbuckets = new sn *[newBucketSize]();
+        size_t bsize = bucketSize;
         bucketSize = newBucketSize;
-        for (int i = 0; i < bucketSize; i++)
+        for (int i = 0; i < bsize; i++)
         {
             sn *cur = buckets[i];
             while (cur)
             {
                 size_t newkey = hashFunction(cur->key);
-                newbuckets[newkey] = new sn(cur->key, cur->next);
-                sn *tmp = cur;
-                cur = cur->next;
-                delete tmp;
+                sn *tmp = cur->next;
+                cur->next = newbuckets[newkey];
+                newbuckets[newkey] = cur;
+                cur = tmp;
             }
+            buckets[i] = nullptr;
         }
         delete[] buckets;
         buckets = newbuckets;
     }
-
 public:
     // 构造函数
     explicit HashMap(size_t initialBucketSize = 10, float loadFactor = 0.75f)
@@ -52,31 +54,66 @@ public:
         maxLoadFactor = loadFactor;
         elementCount = 0;
         bucketSize = initialBucketSize;
-        buckets = new sn *[bucketSize];
+        buckets = new sn *[bucketSize](); // () 保证初始化为nullptr
     }
 
     // 析构函数
-    ~HashMap();
+    ~HashMap()
+    {
+        clear();
+        delete[] buckets;
+    }
 
     // 基础操作
     void insert(const K &key, const V &value)
     {
-        size_t index = hashFunction(key);
-        elementCount++;
-        sn *newnode = new Node(key, value);
-        newnode->next = buckets[index];
-        buckets[index] = newnode;
-        if ((float)elementCount / bucketSize > maxLoadFactor)
+        if (((float)elementCount + 1) / bucketSize > maxLoadFactor)
         {
             rehash(bucketSize * 2);
         }
+        size_t index = hashFunction(key);
+        Node *curr = buckets[index];
+
+        // 遍历链表查找键是否存在
+        while (curr)
+        {
+            if (curr->key == key)
+            {
+                curr->value = value; // 更新值
+                return;
+            }
+            curr = curr->next;
+        }
+        buckets[index] = new Node(key, value,buckets[index]);
+        elementCount++;
     }
     // 删除
     bool remove(const K &key)
     {
         size_t index = hashFunction(key);
-        elementCount--;
-        delete buckets[index];
+        Node *curr = buckets[index];
+        Node *prev = nullptr;
+
+        while (curr)
+        {
+            if (curr->key == key)
+            {
+                if (prev)
+                {
+                    prev->next = curr->next; // 中间节点
+                }
+                else
+                {
+                    buckets[index] = curr->next; // 头节点
+                }
+                delete curr;
+                elementCount--;
+                return true;
+            }
+            prev = curr;
+            curr = curr->next;
+        }
+        return false;
     }
     // 存在性检查
     bool contains(const K &key) const
@@ -107,14 +144,87 @@ public:
         return nullptr; // 键不存在
     }
 
-    const V *get(const K &key) const;
-
     // 工具方法
     size_t size() const { return elementCount; }
     bool empty() const { return elementCount == 0; }
-    void clear();
+    void clear()
+    {
+        for (int i = 0; i < bucketSize; i++)
+        {
+            sn *cur = buckets[i];
+            while (cur)
+            {
+                sn *tmp = cur;
+                cur = cur->next;
+                delete tmp;
+            }
+            buckets[i] = nullptr;
+        }
+        elementCount = 0;
+    }
+    // 手动实现深拷贝
+    HashMap(const HashMap &other)
+    {
+        bucketSize = other.bucketSize;
+        elementCount = 0;
+        maxLoadFactor = other.maxLoadFactor;
+        buckets = new sn *[bucketSize]();
+        for (size_t i = 0; i < other.bucketSize; i++)
+        {
+            sn *cur = other.buckets[i];
+            sn *last = nullptr;
 
-    // 禁用拷贝（或手动实现深拷贝）
-    HashMap(const HashMap &) = delete;
-    HashMap &operator=(const HashMap &) = delete;
+            // 遍历 'other' map 当前桶的链表
+            while (cur)
+            {
+                sn *newNode = new sn(cur->key, cur->value);
+
+                if (last)
+                {
+                    last->next = newNode; // 将前一个节点的 next 指向新的节点
+                }
+                else
+                {
+                    buckets[i] = newNode; // 该桶的第一个节点
+                }
+
+                last = newNode;  // 更新 last 指向新节点
+                cur = cur->next; // 继续遍历下一个节点
+                elementCount++;  // 更新元素数量
+            }
+        }
+    }
+    HashMap &operator=(const HashMap &other)
+    {
+        if(this == &other)
+        {
+            return *this;
+        }
+        this->clear();
+        delete[] buckets;
+        bucketSize = other.bucketSize;
+        elementCount = other.elementCount;
+        maxLoadFactor = other.maxLoadFactor;
+        buckets = new sn *[bucketSize]();
+        for (size_t i = 0; i < bucketSize;i++)
+        {
+            sn *cur = other.buckets[i];
+            sn *last = nullptr;
+            while(cur)
+            {
+                sn *newnode = new sn(cur->key, cur->value);
+                if(last)
+                {
+                    last->next = newnode;
+                }
+                else
+                {
+                    buckets[i] = newnode;
+                }
+                last = newnode;
+                cur = cur->next;
+            }
+        }
+        return *this;
+    }
 };
