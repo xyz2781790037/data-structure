@@ -66,7 +66,7 @@ protected:
 
 public:
     // 构造函数/析构函数
-    BinaryTree() : root(nullptr){}
+    BinaryTree() : root(nullptr) {}
     virtual ~BinaryTree() { clear(root); } // 需要递归释放节点内存
 
     // 基础操作
@@ -147,15 +147,15 @@ public:
 
     // 遍历接口
     // 先序遍历
-    void preOrder(void (*visit)(const T &),sn* node = root) const
+    void preOrder(void (*visit)(const T &), sn *node = root) const
     {
         if (node == nullptr)
         {
             return;
         }
-        cout << node->data << " ";
-        preOrder(node->left);
-        preOrder(node->right);
+        visit(node->data);
+        preOrder(visit, node->left);
+        preOrder(visit, node->right);
     }
     // 中序遍历
     void inOrder(void (*visit)(const T &), sn *node = root) const
@@ -164,9 +164,9 @@ public:
         {
             return;
         }
-        inOrder(node->left);
-        cout << node->data << " ";
-        inOrder(node->right);
+        inOrder(visit, node->left);
+        visit(node->data);
+        inOrder(visit, node->right);
     }
     // 后序遍历
     void postOrder(void (*visit)(const T &), sn *node = root) const
@@ -175,12 +175,14 @@ public:
         {
             return;
         }
-        postOrder(node->left);
-        cout << node->data << " ";
-        postOrder(node->right);
+        postOrder(visit, node->left);
+        visit(node->data);
+        postOrder(visit, node->right);
     }
     // 工具函数
     bool isEmpty() const { return root == nullptr; }
+
+private:
     // 递归清空子树
     void clear(Node *node)
     {
