@@ -1,3 +1,6 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
 template <typename T>
 struct AVLNode
 {
@@ -23,6 +26,8 @@ private:
     // 计算平衡因子
     int balanceFactor(AVLNode<T> *node)
     {
+        if (!node)
+            return 0;
         int high1 = height(node->left);
         int high2 = height(node->right);
         return high1 - high2;
@@ -30,7 +35,10 @@ private:
     // 更新节点高度
     void updateHeight(AVLNode<T> *node)
     {
-        node->height = 1 + std::max(height(node->left), height(node->right));
+        if(node)
+        {
+            node->height = 1 + std::max(height(node->left), height(node->right));
+        }
     }
 
     // 旋转操作
@@ -93,16 +101,22 @@ private:
     {
         if (node == nullptr)
         {
-            return new AVLNode(key);
+            return new AVLNode<T>(key);
         }
-        else if (node->key > value)
+        if (node->key > key)
         {
             node->left = insertHelper(node->left, key);
         }
-        else
+        else if(node->key < key)
         {
             node->right = insertHelper(node->right, key);
         }
+        else
+        {
+            return node;
+        }
+        updateHeight(node);
+        return rebalance(node);
     }
     // 找子树最小节点
     AVLNode<T> *findMinNode(AVLNode<T> *node)
@@ -118,6 +132,8 @@ private:
     }
     AVLNode<T> *deleteHelper(AVLNode<T> *node, T key)
     {
+        if (!node)
+            return nullptr;
         if (node->key == key)
         {
             if(!node->left && !node->right)
@@ -133,7 +149,9 @@ private:
             }
             else
             {
-                BSTNode<T> *instead = findMinNode(node->right);
+                AVLNode<T> *temp = findMinNode(node->right);
+                node->key = temp->key;
+                node->right = deleteHelper(node->right, temp->key);
             }
         }
         else if(node->key > key)
@@ -144,6 +162,8 @@ private:
         {
             node->right = deleteHelper(node->right, key);
         }
+        updateHeight(node);
+        return rebalance(node);
     }
     // 内存管理
     void clear(AVLNode<T> *node)
@@ -185,7 +205,6 @@ public:
     void insert(T key)
     {
         root = insertHelper(root, key);
-        root = balanceFactor(root);
     }
     // 删除键
     void remove(T key)
@@ -208,5 +227,4 @@ public:
         cout << node->key << " ";
         printInOrder(node->right);
     }
-    void printTree();     // 可选：可视化打印树结构（较复杂）
 };
