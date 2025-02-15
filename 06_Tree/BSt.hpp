@@ -23,7 +23,7 @@ private:
         {
             return new BSTNode(value);
         }
-        else if (node->data() > value)
+        else if (node->data > value)
         {
             node->left = insertHelper(node->left, value);
         }

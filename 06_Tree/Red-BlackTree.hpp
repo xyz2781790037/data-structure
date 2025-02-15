@@ -13,13 +13,8 @@ struct RBTreeNode
     RBTreeNode *right;
     RBTreeNode *parent;
 
-    RBTreeNode(T k, Color c = RED,
-               RBTreeNode *l = nullptr,
-               RBTreeNode *r = nullptr,
-               RBTreeNode *p = nullptr)
-        : key(k), color(c), left(l), right(r), parent(p) {}
+    RBTreeNode(T k, Color c = RED, RBTreeNode *l = nullptr, RBTreeNode *r = nullptr, RBTreeNode *p = nullptr) : key(k), color(c), left(l), right(r), parent(p) {}
 };
-
 template <typename T>
 class RedBlackTree
 {
