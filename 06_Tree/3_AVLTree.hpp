@@ -16,7 +16,6 @@ class AVLTree
 {
 private:
     AVLNode<T> *root;
-
     // 基本辅助函数
     // 获取节点高度
     int height(AVLNode<T> *node)
@@ -195,6 +194,12 @@ private:
             return containsHelp(node->right, key);
         }
     }
+    void print(AVLNode<T>* node)
+    {
+        print(node->left);
+        cout << node->key << " ";
+        print(node->right);
+    }
 
 public:
     AVLTree() : root(nullptr) {}
@@ -214,17 +219,15 @@ public:
     // 查找键是否存在
     bool contains(T key)
     {
-        return containsHelp(root,key) != nullptr
+        return containsHelp(root, key) != nullptr;
     }
     // 中序遍历打印（测试用）
-    void printInOrder(AVLNode<T> *node = root)
+    void printInOrder()
     {
-        if(node == nullptr)
+        if(root == nullptr)
         {
             return;
         }
-        printInOrder(node->left);
-        cout << node->key << " ";
-        printInOrder(node->right);
+        print(root);
     }
 };
