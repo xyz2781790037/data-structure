@@ -34,7 +34,7 @@ private:
     // 更新节点高度
     void updateHeight(AVLNode<T> *node)
     {
-        if(node)
+        if (node)
         {
             node->height = 1 + std::max(height(node->left), height(node->right));
         }
@@ -68,28 +68,36 @@ private:
     // 重新平衡节点
     AVLNode<T> *rebalance(AVLNode<T> *node)
     {
-        if (balanceFactor(node) == 2)
+        if (!node)
+            return node;
+
+        int bf = balanceFactor(node);
+
+        // 左子树高
+        if (bf > 1)
         {
-            if (balanceFactor(node->left) == 1)
-            {
-                node = rightRotate(node);
+            if (balanceFactor(node->left) >= 0)
+            { // LL
+                return rightRotate(node);
             }
             else
-            {
+            { // LR
                 node->left = leftRotate(node->left);
-                node = rightRotate(node);
+                return rightRotate(node);
             }
         }
-        else if (balanceFactor(node) == -2)
+
+        // 右子树高
+        if (bf < -1)
         {
-            if (balanceFactor(node->right) == -1)
-            {
-                node = leftRotate(node);
+            if (balanceFactor(node->right) <= 0)
+            { // RR
+                return leftRotate(node);
             }
             else
-            {
+            { // RL
                 node->right = rightRotate(node->right);
-                node = leftRotate(node);
+                return leftRotate(node);
             }
         }
         return node;
@@ -106,7 +114,7 @@ private:
         {
             node->left = insertHelper(node->left, key);
         }
-        else if(node->key < key)
+        else if (node->key < key)
         {
             node->right = insertHelper(node->right, key);
         }
@@ -135,7 +143,7 @@ private:
             return nullptr;
         if (node->key == key)
         {
-            if(!node->left && !node->right)
+            if (!node->left && !node->right)
             {
                 delete node;
                 return nullptr;
@@ -153,7 +161,7 @@ private:
                 node->right = deleteHelper(node->right, temp->key);
             }
         }
-        else if(node->key > key)
+        else if (node->key > key)
         {
             node->left = deleteHelper(node->left, key);
         }
@@ -161,13 +169,17 @@ private:
         {
             node->right = deleteHelper(node->right, key);
         }
+        if (!node)
+        {
+            return nullptr;
+        }
         updateHeight(node);
         return rebalance(node);
     }
     // 内存管理
     void clear(AVLNode<T> *node)
     {
-        if(node ==nullptr)
+        if (node == nullptr)
         {
             return;
         }
@@ -175,17 +187,17 @@ private:
         clear(node->left);
         delete node;
     }
-    AVLNode<T>* containsHelp(AVLNode<T>* node,T& key)
+    AVLNode<T> *containsHelp(AVLNode<T> *node, T &key)
     {
-        if(node == nullptr)
+        if (node == nullptr)
         {
             return nullptr;
         }
-        if(node->key == key)
+        if (node->key == key)
         {
             return node;
         }
-        else if(node->key > key)
+        else if (node->key > key)
         {
             return containsHelp(node->left, key);
         }
@@ -194,11 +206,14 @@ private:
             return containsHelp(node->right, key);
         }
     }
-    void print(AVLNode<T>* node)
+    void print(AVLNode<T> *node)
     {
-        print(node->left);
-        cout << node->key << " ";
-        print(node->right);
+        if (node)
+        {
+            print(node->left);
+            cout << node->key << " ";
+            print(node->right);
+        }
     }
 
 public:
@@ -224,10 +239,16 @@ public:
     // 中序遍历打印（测试用）
     void printInOrder()
     {
-        if(root == nullptr)
+        if (root == nullptr)
         {
             return;
         }
         print(root);
+        cout << endl;
+    }
+    void rootprint()
+    {
+        cout << root->key << "   ";
+        cout << root->left->key << endl;
     }
 };

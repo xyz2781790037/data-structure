@@ -9,10 +9,12 @@ void test1()
     tree.insert(8);
     tree.insert(6);
 
+    tree.rootprint();
+
     tree.printInOrder();
     tree.remove(6);
     tree.remove(5);
-    tree.printInOrder(); // 输出：10 20 25 50
+    tree.printInOrder();
     cout << tree.contains(5) << endl;
 }
 int main()
