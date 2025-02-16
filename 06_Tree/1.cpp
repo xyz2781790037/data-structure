@@ -6,7 +6,6 @@ enum Color
     RED,
     BLACK
 };
-
 template <typename T>
 struct RBTreeNode
 {
